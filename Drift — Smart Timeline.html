@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)file:///C:/Users/harry/Downloads/drift-smart-timeline%20(2).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drift — Smart Timeline</title>
+<link href="./Drift — Smart Timeline_files/css2" rel="stylesheet">
+<style>
+:root {
+  --bg: #080810;
+  --bg2: #0f0f1a;
+  --bg3: #161625;
+  --bg4: #1e1e30;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --text: #eeeef5;
+  --text2: #8888aa;
+  --text3: #44445a;
+  --blue: #4d8ef0;
+  --blue2: #7ab0ff;
+  --blue-glow: rgba(77,142,240,0.15);
+  --green: #34d4a0;
+  --green-glow: rgba(52,212,160,0.15);
+  --purple: #a78bfa;
+  --purple-glow: rgba(167,139,250,0.15);
+  --amber: #fbbf24;
+  --amber-glow: rgba(251,191,36,0.15);
+  --red: #f87171;
+  --pink: #f472b6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* Animated background */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(77,142,240,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 80% 80%, rgba(167,139,250,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 60% 10%, rgba(52,212,160,0.03) 0%, transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+/* Grid */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);
+  background-size:50px 50px;pointer-events:none;z-index:0;
+}
+
+.app{position:relative;z-index:1;display:grid;grid-template-columns:1fr;min-height:100vh;}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(8,8,16,0.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;height:56px;
+}
+.nav-logo{font-size:18px;font-weight:800;letter-spacing:-1px;color:var(--text);}
+.nav-logo span{color:var(--blue);}
+.nav-tabs{display:flex;gap:2px;}
+.nav-tab{
+  padding:6px 16px;border-radius:8px;border:none;background:transparent;
+  color:var(--text2);font-family:'Syne',sans-serif;font-size:12px;font-weight:500;
+  cursor:pointer;transition:all 0.2s;letter-spacing:0.02em;
+}
+.nav-tab:hover{color:var(--text);background:var(--bg3);}
+.nav-tab.active{color:var(--text);background:var(--bg3);}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.live-badge{
+  display:flex;align-items:center;gap:6px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);
+  background:var(--green-glow);border:1px solid rgba(52,212,160,0.2);
+  padding:4px 10px;border-radius:20px;
+}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* MAIN CONTENT */
+.main{padding-top:56px;display:none;}
+.main.active{display:block;}
+
+/* TIMELINE VIEW */
+.timeline-wrap{max-width:900px;margin:0 auto;padding:40px 24px 100px;}
+.page-header{margin-bottom:40px;}
+.page-title{font-size:32px;font-weight:800;letter-spacing:-1px;margin-bottom:8px;}
+.page-title span{color:var(--blue);}
+.page-sub{font-size:14px;color:var(--text2);line-height:1.6;}
+
+/* Stats bar */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:36px;}
+.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+.stat-box-l{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;}
+.stat-box-v{font-size:20px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;}
+.stat-box-s{font-size:10px;color:var(--text3);margin-top:3px;}
+
+/* Progress */
+.prog-wrap{margin-bottom:36px;}
+.prog-labels{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;}
+.prog-track{height:2px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--purple),var(--green));transition:width 0.6s ease;}
+
+/* Week blocks — fixed layout */
+.timeline-line{position:relative;padding-left:52px;}
+.timeline-line::before{
+  content:'';position:absolute;left:16px;top:0;bottom:0;
+  width:1px;background:linear-gradient(to bottom,var(--blue),var(--purple),var(--amber));
+  opacity:0.2;
+}
+.week{position:relative;margin-bottom:12px;}
+.week-left{
+  position:absolute;left:-52px;top:18px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;width:40px;
+}
+.week-num-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text3);text-align:center;line-height:1;}
+.week-dot{
+  width:14px;height:14px;border-radius:50%;border:2px solid var(--bg);
+  flex-shrink:0;transition:all 0.3s;position:relative;z-index:1;
+}
+.week-dot.p1{background:var(--blue);box-shadow:0 0 10px rgba(77,142,240,0.6);}
+.week-dot.p2{background:var(--green);box-shadow:0 0 10px rgba(52,212,160,0.6);}
+.week-dot.p3{background:var(--purple);box-shadow:0 0 10px rgba(167,139,250,0.6);}
+.week-dot.p4{background:var(--amber);box-shadow:0 0 10px rgba(251,191,36,0.6);}
+.week-dot.complete{background:var(--green);box-shadow:0 0 14px rgba(52,212,160,0.8);}
+.week-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;transition:border-color 0.2s;cursor:pointer;width:100%;
+}
+.week-card:hover{border-color:var(--border2);}
+.week-card.open{border-color:rgba(77,142,240,0.35);box-shadow:0 0 24px rgba(77,142,240,0.06);}
+.week-card-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.wch-left{flex:1;min-width:0;}
+.wch-meta{display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap;}
+.phase-pill{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap;}
+.pp1{background:var(--blue-glow);color:var(--blue);}
+.pp2{background:var(--green-glow);color:var(--green);}
+.pp3{background:var(--purple-glow);color:var(--purple);}
+.pp4{background:var(--amber-glow);color:var(--amber);}
+.tp-py{background:rgba(251,191,36,0.08);color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.tp-drift{background:rgba(77,142,240,0.08);color:var(--blue2);font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.tp-both{background:rgba(167,139,250,0.08);color:var(--purple);font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.wch-title{font-size:14px;font-weight:600;color:var(--text);white-space:normal;word-break:break-word;}
+.wch-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.wch-prog{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);white-space:nowrap;}
+.chevron{color:var(--text3);font-size:10px;transition:transform 0.2s;}
+.chevron.open{transform:rotate(180deg);}
+.week-body{display:none;border-top:1px solid var(--border);padding:18px;}
+.week-body.show{display:block;}
+
+/* Two column tasks */
+.tasks-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:580px){.tasks-grid{grid-template-columns:1fr;}}
+.tasks-col{}
+.tasks-col-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.col-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.task-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;cursor:pointer;}
+.task-cb{
+  width:15px;height:15px;border-radius:4px;border:1px solid var(--border2);
+  flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;font-size:9px;
+}
+.task-cb.done{background:var(--green);border-color:var(--green);color:#000;font-weight:700;}
+.task-txt{font-size:12px;color:var(--text2);line-height:1.55;transition:all 0.2s;word-break:break-word;}
+.task-txt.done{color:var(--text3);text-decoration:line-through;}
+.milestone-strip{
+  background:var(--bg3);border-radius:10px;padding:12px 14px;
+  border-left:2px solid;display:flex;align-items:flex-start;gap:10px;margin-top:4px;
+}
+.ms-p1{border-color:var(--blue);}
+.ms-p2{border-color:var(--green);}
+.ms-p3{border-color:var(--purple);}
+.ms-p4{border-color:var(--amber);}
+.ms-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.ms-text-wrap{min-width:0;}
+.ms-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px;}
+.ms-text{font-size:12px;color:var(--text);font-weight:600;line-height:1.5;word-break:break-word;}
+
+/* Skills earned badges */
+.skills-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.skill-badge{font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 9px;border-radius:20px;background:var(--bg4);color:var(--text3);border:1px solid var(--border);}
+.skill-badge.earned{background:var(--green-glow);color:var(--green);border-color:rgba(52,212,160,0.2);}
+
+/* Mood tracker */
+.mood-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.mood-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;flex-shrink:0;}
+.mood-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:3px 8px;cursor:pointer;font-size:13px;transition:all 0.15s;}
+.mood-btn:hover,.mood-btn.active{background:var(--bg3);border-color:var(--border2);transform:scale(1.15);}
+
+/* MINDMAP VIEW */
+#mindmap-view{padding:40px 24px 100px;max-width:1100px;margin:0 auto;}
+.mm-header{margin-bottom:32px;}
+.mm-canvas-wrap{
+  background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+  padding:24px;position:relative;overflow:hidden;min-height:600px;
+}
+.mm-canvas{position:relative;width:100%;height:580px;}
+svg.mm-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+.mm-node{
+  position:absolute;transform:translate(-50%,-50%);
+  background:var(--bg3);border:1px solid var(--border2);border-radius:12px;
+  padding:10px 14px;cursor:pointer;transition:all 0.25s;
+  text-align:center;min-width:100px;max-width:150px;
+  user-select:none;
+}
+.mm-node:hover,.mm-node.selected{border-color:var(--blue);box-shadow:0 0 20px var(--blue-glow);}
+.mm-node.center{
+  background:linear-gradient(135deg,rgba(77,142,240,0.2),rgba(167,139,250,0.2));
+  border-color:rgba(77,142,240,0.4);min-width:120px;
+  box-shadow:0 0 30px var(--blue-glow);
+}
+.mm-node.drift{border-color:rgba(77,142,240,0.3);background:rgba(77,142,240,0.06);}
+.mm-node.python{border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.06);}
+.mm-node.career{border-color:rgba(52,212,160,0.3);background:rgba(52,212,160,0.06);}
+.mm-node.future{border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.06);}
+.mm-node-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.mm-node-sub{font-size:9px;color:var(--text2);line-height:1.4;}
+.mm-node-badge{font-family:'JetBrains Mono',monospace;font-size:8px;padding:1px 6px;border-radius:10px;margin-top:4px;display:inline-block;}
+.mm-add-btn{
+  position:absolute;bottom:16px;right:16px;
+  background:var(--blue);border:none;border-radius:10px;
+  color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;
+  padding:8px 16px;cursor:pointer;transition:all 0.2s;
+}
+.mm-add-btn:hover{background:var(--blue2);}
+.mm-detail{
+  margin-top:16px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:12px;padding:16px;min-height:80px;
+  font-size:13px;color:var(--text2);line-height:1.7;
+  display:none;
+}
+.mm-detail.show{display:block;}
+.mm-detail-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;}
+
+/* CHAT VIEW */
+#chat-view{padding:40px 24px 120px;max-width:800px;margin:0 auto;}
+.chat-header{margin-bottom:24px;}
+.chat-window{
+  background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;display:flex;flex-direction:column;height:500px;
+}
+.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;}
+.chat-messages::-webkit-scrollbar{width:4px;}
+.chat-messages::-webkit-scrollbar-track{background:transparent;}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.msg{max-width:80%;padding:12px 16px;border-radius:12px;font-size:13px;line-height:1.7;}
+.msg.user{
+  align-self:flex-end;
+  background:linear-gradient(135deg,rgba(77,142,240,0.2),rgba(167,139,250,0.15));
+  border:1px solid rgba(77,142,240,0.2);color:var(--text);
+}
+.msg.ai{
+  align-self:flex-start;
+  background:var(--bg3);border:1px solid var(--border);color:var(--text2);
+}
+.msg.ai .msg-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--blue);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.08em;}
+.msg.thinking{opacity:0.6;font-style:italic;}
+.chat-input-wrap{
+  border-top:1px solid var(--border);padding:14px 16px;
+  background:var(--bg3);display:flex;gap:10px;align-items:flex-end;
+}
+.chat-input{
+  flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;
+  outline:none;resize:none;min-height:42px;max-height:120px;line-height:1.5;
+  transition:border-color 0.2s;
+}
+.chat-input:focus{border-color:rgba(77,142,240,0.4);}
+.chat-send{
+  background:var(--blue);border:none;border-radius:10px;
+  color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;
+  padding:10px 18px;cursor:pointer;transition:all 0.2s;white-space:nowrap;
+  align-self:flex-end;
+}
+.chat-send:hover{background:var(--blue2);}
+.chat-send:disabled{opacity:0.4;cursor:not-allowed;}
+.chat-context{
+  background:var(--bg3);border:1px solid var(--border);border-radius:12px;
+  padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--text2);
+}
+.chat-context-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;}
+.context-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.ctx-tag{
+  font-size:11px;padding:3px 10px;border-radius:20px;cursor:pointer;
+  border:1px solid var(--border2);background:transparent;color:var(--text2);
+  font-family:'Syne',sans-serif;transition:all 0.15s;
+}
+.ctx-tag:hover,.ctx-tag.active{background:var(--blue-glow);border-color:rgba(77,142,240,0.3);color:var(--blue2);}
+.quick-prompts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.qp{
+  font-size:11px;padding:5px 12px;border-radius:20px;
+  border:1px solid var(--border2);background:transparent;
+  color:var(--text2);cursor:pointer;font-family:'Syne',sans-serif;transition:all 0.15s;
+}
+.qp:hover{border-color:var(--border2);background:var(--bg3);color:var(--text);}
+
+/* Saved badge */
+.save-flash{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--green-glow);border:1px solid rgba(52,212,160,0.3);
+  color:var(--green);font-family:'JetBrains Mono',monospace;font-size:11px;
+  padding:8px 16px;border-radius:10px;
+  opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:200;
+}
+.save-flash.show{opacity:1;}
+
+@media(max-width:600px){
+  .stats-bar{grid-template-columns:1fr 1fr;}
+  .tasks-grid{grid-template-columns:1fr;}
+  nav{padding:0 12px;}
+  .nav-tab{padding:6px 10px;font-size:11px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">drift<span>.</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showView(&#39;timeline&#39;)">Timeline</button>
+    <button class="nav-tab" onclick="showView(&#39;mindmap&#39;)">Mind Map</button>
+    <button class="nav-tab" onclick="showView(&#39;chat&#39;)">AI Chat</button>
+  </div>
+  <div class="nav-right">
+    <div class="live-badge"><div class="live-dot"></div>progress saved</div>
+  </div>
+</nav>
+
+<div class="app">
+
+<!-- TIMELINE -->
+<div id="timeline-view" class="main active">
+<div class="timeline-wrap">
+  <div class="page-header">
+    <div class="page-title">Your <span>build</span> roadmap</div>
+    <div class="page-sub">100 Days of Code + Drift — synced, tracked, and ticked off as you go.</div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat-box">
+      <div class="stat-box-l">Python day</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="stat-box-v" id="py-day">3</div>
+        <button onclick="incPyDay()" style="background:var(--blue-glow);border:1px solid rgba(77,142,240,0.3);color:var(--blue);border-radius:6px;padding:2px 8px;cursor:pointer;font-family:JetBrains Mono,monospace;font-size:11px;">+1</button>
+      </div>
+      <div class="stat-box-s">of 100 — tap +1 each day</div>
+    </div>
+    <div class="stat-box"><div class="stat-box-l">Drift week</div><div class="stat-box-v" id="drift-week">1</div><div class="stat-box-s">of 12</div></div>
+    <div class="stat-box"><div class="stat-box-l">Tasks done</div><div class="stat-box-v" id="tasks-stat">0/98</div><div class="stat-box-s">check off daily</div></div>
+    <div class="stat-box"><div class="stat-box-l">Ship target</div><div class="stat-box-v">Aug</div><div class="stat-box-s">Week 10 live URL</div></div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-labels"><span>Overall progress</span><span id="pct-label">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="timeline-line" id="timeline-blocks"><div class="week" id="week-0">
+      <div class="week-left">
+        <div class="week-num-label">WK1</div>
+        <div class="week-dot p1"></div>
+      </div>
+      <div class="week-card" id="card-0">
+        <div class="week-card-header" onclick="toggleWeek(0)">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill pp1">Foundation</span>
+              <span class="tp-both">Python + Drift</span>
+              
+            </div>
+            <div class="wch-title">⚡ Setup + Python Days 1–7</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">0/10</span>
+            <span class="chevron" id="chev-0">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-0">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              <div class="task-item" onclick="toggleTask(&#39;0-py-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Review Days 1–3 (printing, variables, strings)</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;0-py-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 4: Randomisation &amp; lists</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;0-py-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 5: Loops</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;0-py-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 6: Functions &amp; Karel</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;0-py-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 7: Hangman project</div>
+      </div>
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              <div class="task-item" onclick="toggleTask(&#39;0-dr-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Install VS Code + Python 3.11</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;0-dr-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Create GitHub repo + drift/ folder</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;0-dr-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">pip install yfinance pandas</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;0-dr-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Pull first NZX price with yfinance</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;0-dr-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Explore a pandas DataFrame</div>
+      </div>
+            </div>
+          </div>
+          <div class="milestone-strip ms-p1">
+            <div class="ms-icon">⚡</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">You can write basic Python AND pull live NZX price data</div>
+            </div>
+          </div>
+          <div class="skills-row"><span class="skill-badge ">Python basics</span><span class="skill-badge ">VS Code</span><span class="skill-badge ">yfinance</span><span class="skill-badge ">pandas</span><span class="skill-badge ">GitHub</span></div>
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            <button class="mood-btn " onclick="setMood(event,0,0)" title="Tough">😤</button><button class="mood-btn " onclick="setMood(event,0,1)" title="Ok">😐</button><button class="mood-btn " onclick="setMood(event,0,2)" title="Good">🙂</button><button class="mood-btn " onclick="setMood(event,0,3)" title="On fire">🔥</button>
+          </div>
+        </div>
+      </div>
+    </div><div class="week" id="week-1">
+      <div class="week-left">
+        <div class="week-num-label">WK2</div>
+        <div class="week-dot p1"></div>
+      </div>
+      <div class="week-card" id="card-1">
+        <div class="week-card-header" onclick="toggleWeek(1)">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill pp1">Foundation</span>
+              <span class="tp-both">Python + Drift</span>
+              
+            </div>
+            <div class="wch-title">📡 Python Days 8–14 + Move Detection</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">0/8</span>
+            <span class="chevron" id="chev-1">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-1">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              <div class="task-item" onclick="toggleTask(&#39;1-py-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 8–9: Caesar cipher + functions</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;1-py-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 10–11: Blackjack project</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;1-py-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 12–14: Scope, closures, debugging</div>
+      </div>
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              <div class="task-item" onclick="toggleTask(&#39;1-dr-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Write detect_move() function — flags &gt;2% daily moves</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;1-dr-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Handle missing data + public holidays</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;1-dr-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Test on 5 NZX tickers</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;1-dr-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Log detected moves to CSV</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;1-dr-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Commit cleanly to GitHub</div>
+      </div>
+            </div>
+          </div>
+          <div class="milestone-strip ms-p1">
+            <div class="ms-icon">📡</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">Drift automatically flags significant price moves</div>
+            </div>
+          </div>
+          <div class="skills-row"><span class="skill-badge ">Functions</span><span class="skill-badge ">File I/O</span><span class="skill-badge ">CSV handling</span><span class="skill-badge ">Data validation</span></div>
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            <button class="mood-btn " onclick="setMood(event,1,0)" title="Tough">😤</button><button class="mood-btn " onclick="setMood(event,1,1)" title="Ok">😐</button><button class="mood-btn " onclick="setMood(event,1,2)" title="Good">🙂</button><button class="mood-btn " onclick="setMood(event,1,3)" title="On fire">🔥</button>
+          </div>
+        </div>
+      </div>
+    </div><div class="week" id="week-2">
+      <div class="week-left">
+        <div class="week-num-label">WK3</div>
+        <div class="week-dot p1"></div>
+      </div>
+      <div class="week-card" id="card-2">
+        <div class="week-card-header" onclick="toggleWeek(2)">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill pp1">Foundation</span>
+              <span class="tp-both">Python + Drift</span>
+              
+            </div>
+            <div class="wch-title">🔗 Python Days 15–21 + Macro Pipeline</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">0/8</span>
+            <span class="chevron" id="chev-2">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-2">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              <div class="task-item" onclick="toggleTask(&#39;2-py-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 15–17: Local dev + coffee machine OOP</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;2-py-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 18–20: Turtle graphics + GUI</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;2-py-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 21: Snake game</div>
+      </div>
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              <div class="task-item" onclick="toggleTask(&#39;2-dr-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Pull Brent crude oil data via API</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;2-dr-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Pull NZD/USD exchange rate daily</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;2-dr-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Pull NZ 10yr bond yield</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;2-dr-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Align all data sources to same timestamps</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;2-dr-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Map sectors: AIR.NZ=crude, CEN.NZ=hydrology</div>
+      </div>
+            </div>
+          </div>
+          <div class="milestone-strip ms-p1">
+            <div class="ms-icon">🔗</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">Multi-source macro data pipeline running</div>
+            </div>
+          </div>
+          <div class="skills-row"><span class="skill-badge ">APIs</span><span class="skill-badge ">JSON</span><span class="skill-badge ">Data alignment</span><span class="skill-badge ">Pandas merging</span></div>
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            <button class="mood-btn " onclick="setMood(event,2,0)" title="Tough">😤</button><button class="mood-btn " onclick="setMood(event,2,1)" title="Ok">😐</button><button class="mood-btn " onclick="setMood(event,2,2)" title="Good">🙂</button><button class="mood-btn " onclick="setMood(event,2,3)" title="On fire">🔥</button>
+          </div>
+        </div>
+      </div>
+    </div><div class="week" id="week-3">
+      <div class="week-left">
+        <div class="week-num-label">WK4</div>
+        <div class="week-dot p2"></div>
+      </div>
+      <div class="week-card" id="card-3">
+        <div class="week-card-header" onclick="toggleWeek(3)">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill pp2">Core Build</span>
+              <span class="tp-both">Python + Drift</span>
+              
+            </div>
+            <div class="wch-title">🧠 Python Days 22–28 + Causal Logic</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">0/8</span>
+            <span class="chevron" id="chev-3">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-3">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              <div class="task-item" onclick="toggleTask(&#39;3-py-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 22–24: Pong game</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;3-py-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 25–26: US States game</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;3-py-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 27–28: Tkinter + pandas data analysis</div>
+      </div>
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              <div class="task-item" onclick="toggleTask(&#39;3-dr-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Define causal factor library (crude, FX, sector, earnings)</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;3-dr-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Write correlation logic for factor ranking</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;3-dr-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Hard-code sector mappings for 10 NZX tickers</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;3-dr-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Back-test logic against 20 historical moves</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;3-dr-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Document methodology — you need this for interviews</div>
+      </div>
+            </div>
+          </div>
+          <div class="milestone-strip ms-p2">
+            <div class="ms-icon">🧠</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">First AI-generated causal explanation from real data</div>
+            </div>
+          </div>
+          <div class="skills-row"><span class="skill-badge ">Correlation logic</span><span class="skill-badge ">OOP</span><span class="skill-badge ">Data modelling</span><span class="skill-badge ">Backtesting</span></div>
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            <button class="mood-btn " onclick="setMood(event,3,0)" title="Tough">😤</button><button class="mood-btn " onclick="setMood(event,3,1)" title="Ok">😐</button><button class="mood-btn " onclick="setMood(event,3,2)" title="Good">🙂</button><button class="mood-btn " onclick="setMood(event,3,3)" title="On fire">🔥</button>
+          </div>
+        </div>
+      </div>
+    </div><div class="week" id="week-4">
+      <div class="week-left">
+        <div class="week-num-label">WK5</div>
+        <div class="week-dot p2"></div>
+      </div>
+      <div class="week-card" id="card-4">
+        <div class="week-card-header" onclick="toggleWeek(4)">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill pp2">Core Build</span>
+              <span class="tp-both">Python + Drift</span>
+              
+            </div>
+            <div class="wch-title">🤖 Python Days 29–35 + Claude API</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">0/8</span>
+            <span class="chevron" id="chev-4">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-4">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              <div class="task-item" onclick="toggleTask(&#39;4-py-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 29–31: Password manager</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;4-py-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 32–34: Automated birthday emailer</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;4-py-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 35: Keys + authentication patterns</div>
+      </div>
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              <div class="task-item" onclick="toggleTask(&#39;4-dr-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Sign up for Anthropic API key</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;4-dr-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Send causal data to Claude API</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;4-dr-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Prompt engineer: structured input → ranked explanation</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;4-dr-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Handle API errors + rate limits</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;4-dr-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Compare AI output vs manual — refine prompt</div>
+      </div>
+            </div>
+          </div>
+          <div class="milestone-strip ms-p2">
+            <div class="ms-icon">🤖</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">End-to-end: price move → causes ranked → AI summary</div>
+            </div>
+          </div>
+          <div class="skills-row"><span class="skill-badge ">Claude API</span><span class="skill-badge ">Prompt engineering</span><span class="skill-badge ">Error handling</span><span class="skill-badge ">Auth patterns</span></div>
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            <button class="mood-btn " onclick="setMood(event,4,0)" title="Tough">😤</button><button class="mood-btn " onclick="setMood(event,4,1)" title="Ok">😐</button><button class="mood-btn " onclick="setMood(event,4,2)" title="Good">🙂</button><button class="mood-btn " onclick="setMood(event,4,3)" title="On fire">🔥</button>
+          </div>
+        </div>
+      </div>
+    </div><div class="week" id="week-5">
+      <div class="week-left">
+        <div class="week-num-label">WK6</div>
+        <div class="week-dot p2"></div>
+      </div>
+      <div class="week-card" id="card-5">
+        <div class="week-card-header" onclick="toggleWeek(5)">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill pp2">Core Build</span>
+              <span class="tp-both">Python + Drift</span>
+              
+            </div>
+            <div class="wch-title">📊 Python Days 36–42 + Confidence Scoring</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">0/8</span>
+            <span class="chevron" id="chev-5">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-5">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              <div class="task-item" onclick="toggleTask(&#39;5-py-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 36–38: Stock trading news alert project</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;5-py-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 39–41: Flight deal finder</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;5-py-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 42: Data structures deep dive</div>
+      </div>
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              <div class="task-item" onclick="toggleTask(&#39;5-dr-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Design confidence scoring methodology</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;5-dr-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Implement: correlation strength + data quality scoring</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;5-dr-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Add High/Medium/Low labels to every factor</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;5-dr-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Back-test scores against 30 historical moves</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;5-dr-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Write up methodology in plain English</div>
+      </div>
+            </div>
+          </div>
+          <div class="milestone-strip ms-p2">
+            <div class="ms-icon">📊</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">Every explanation has a defensible confidence score</div>
+            </div>
+          </div>
+          <div class="skills-row"><span class="skill-badge ">Statistical scoring</span><span class="skill-badge ">Methodology design</span><span class="skill-badge ">Testing</span><span class="skill-badge ">Documentation</span></div>
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            <button class="mood-btn " onclick="setMood(event,5,0)" title="Tough">😤</button><button class="mood-btn " onclick="setMood(event,5,1)" title="Ok">😐</button><button class="mood-btn " onclick="setMood(event,5,2)" title="Good">🙂</button><button class="mood-btn " onclick="setMood(event,5,3)" title="On fire">🔥</button>
+          </div>
+        </div>
+      </div>
+    </div><div class="week" id="week-6">
+      <div class="week-left">
+        <div class="week-num-label">WK7</div>
+        <div class="week-dot p2"></div>
+      </div>
+      <div class="week-card" id="card-6">
+        <div class="week-card-header" onclick="toggleWeek(6)">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill pp2">Core Build</span>
+              <span class="tp-both">Python + Drift</span>
+              
+            </div>
+            <div class="wch-title">🗄️ Python Days 43–49 + Database</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">0/8</span>
+            <span class="chevron" id="chev-6">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-6">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              <div class="task-item" onclick="toggleTask(&#39;6-py-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 43–45: Web scraping with BeautifulSoup</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;6-py-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 46–48: Spotify playlist automation</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;6-py-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 49: Web scraping capstone</div>
+      </div>
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              <div class="task-item" onclick="toggleTask(&#39;6-dr-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Set up Supabase free tier</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;6-dr-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Store every detected move + explanation + timestamp</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;6-dr-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Write query: show AIR.NZ moves last 6 months</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;6-dr-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Backfill 3 months historical data for 5 tickers</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;6-dr-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Test querying + fix edge cases</div>
+      </div>
+            </div>
+          </div>
+          <div class="milestone-strip ms-p2">
+            <div class="ms-icon">🗄️</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">Drift has memory — patterns start to emerge</div>
+            </div>
+          </div>
+          <div class="skills-row"><span class="skill-badge ">Supabase</span><span class="skill-badge ">SQL</span><span class="skill-badge ">Web scraping</span><span class="skill-badge ">Data persistence</span></div>
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            <button class="mood-btn " onclick="setMood(event,6,0)" title="Tough">😤</button><button class="mood-btn " onclick="setMood(event,6,1)" title="Ok">😐</button><button class="mood-btn " onclick="setMood(event,6,2)" title="Good">🙂</button><button class="mood-btn " onclick="setMood(event,6,3)" title="On fire">🔥</button>
+          </div>
+        </div>
+      </div>
+    </div><div class="week" id="week-7">
+      <div class="week-left">
+        <div class="week-num-label">WK8</div>
+        <div class="week-dot p3"></div>
+      </div>
+      <div class="week-card" id="card-7">
+        <div class="week-card-header" onclick="toggleWeek(7)">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill pp3">Polish</span>
+              <span class="tp-drift">Drift</span>
+              
+            </div>
+            <div class="wch-title">🎨 Python Days 50–56 + Frontend UI</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">0/8</span>
+            <span class="chevron" id="chev-7">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-7">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              <div class="task-item" onclick="toggleTask(&#39;7-py-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 50–52: Flask introduction</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;7-py-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 53–55: REST APIs + Flask</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;7-py-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 56: Rendering HTML with Flask</div>
+      </div>
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              <div class="task-item" onclick="toggleTask(&#39;7-dr-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Set up React project (or HTML/CSS)</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;7-dr-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Build live feed screen — today's significant moves</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;7-dr-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Build explainer screen — factors + confidence bars</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;7-dr-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Basic navigation between screens</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;7-dr-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Use your HTML/CSS experience here</div>
+      </div>
+            </div>
+          </div>
+          <div class="milestone-strip ms-p3">
+            <div class="ms-icon">🎨</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">Drift looks like a real product someone can open and use</div>
+            </div>
+          </div>
+          <div class="skills-row"><span class="skill-badge ">Flask</span><span class="skill-badge ">React</span><span class="skill-badge ">HTML/CSS</span><span class="skill-badge ">REST APIs</span><span class="skill-badge ">UI design</span></div>
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            <button class="mood-btn " onclick="setMood(event,7,0)" title="Tough">😤</button><button class="mood-btn " onclick="setMood(event,7,1)" title="Ok">😐</button><button class="mood-btn " onclick="setMood(event,7,2)" title="Good">🙂</button><button class="mood-btn " onclick="setMood(event,7,3)" title="On fire">🔥</button>
+          </div>
+        </div>
+      </div>
+    </div><div class="week" id="week-8">
+      <div class="week-left">
+        <div class="week-num-label">WK9</div>
+        <div class="week-dot p3"></div>
+      </div>
+      <div class="week-card" id="card-8">
+        <div class="week-card-header" onclick="toggleWeek(8)">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill pp3">Polish</span>
+              <span class="tp-drift">Drift</span>
+              
+            </div>
+            <div class="wch-title">🔍 Python Days 57–63 + History &amp; Patterns</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">0/8</span>
+            <span class="chevron" id="chev-8">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-8">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              <div class="task-item" onclick="toggleTask(&#39;8-py-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 57–59: Jinja templates + blog project</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;8-py-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 60–62: POST requests + forms</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;8-py-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 63: SQLite databases with Flask</div>
+      </div>
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              <div class="task-item" onclick="toggleTask(&#39;8-dr-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Build history screen — searchable explanation log</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;8-dr-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Write pattern detection logic per ticker</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;8-dr-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Build patterns screen — insights that compound</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;8-dr-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Connect all screens to Supabase</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;8-dr-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Make it mobile responsive</div>
+      </div>
+            </div>
+          </div>
+          <div class="milestone-strip ms-p3">
+            <div class="ms-icon">🔍</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">All four screens live with real data</div>
+            </div>
+          </div>
+          <div class="skills-row"><span class="skill-badge ">Jinja templates</span><span class="skill-badge ">Pattern detection</span><span class="skill-badge ">Mobile CSS</span><span class="skill-badge ">Full-stack</span></div>
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            <button class="mood-btn " onclick="setMood(event,8,0)" title="Tough">😤</button><button class="mood-btn " onclick="setMood(event,8,1)" title="Ok">😐</button><button class="mood-btn " onclick="setMood(event,8,2)" title="Good">🙂</button><button class="mood-btn " onclick="setMood(event,8,3)" title="On fire">🔥</button>
+          </div>
+        </div>
+      </div>
+    </div><div class="week" id="week-9">
+      <div class="week-left">
+        <div class="week-num-label">WK10</div>
+        <div class="week-dot p4"></div>
+      </div>
+      <div class="week-card" id="card-9">
+        <div class="week-card-header" onclick="toggleWeek(9)">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill pp4">Ship</span>
+              <span class="tp-drift">Drift</span>
+              
+            </div>
+            <div class="wch-title">🚀 Python Days 64–70 + Deploy Live</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">0/8</span>
+            <span class="chevron" id="chev-9">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-9">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              <div class="task-item" onclick="toggleTask(&#39;9-py-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 64–66: Flask + SQLAlchemy</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;9-py-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 67–69: Authentication + users</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;9-py-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 70: Blog with users capstone</div>
+      </div>
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              <div class="task-item" onclick="toggleTask(&#39;9-dr-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Deploy backend to Render free tier</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;9-dr-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Deploy frontend to Vercel free tier</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;9-dr-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Buy domain if you want (drift.co.nz?)</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;9-dr-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">End-to-end test on live URL — break it intentionally</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;9-dr-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Send URL to 3 people — watch them use it</div>
+      </div>
+            </div>
+          </div>
+          <div class="milestone-strip ms-p4">
+            <div class="ms-icon">🚀</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">🚀 DRIFT IS LIVE — real URL, goes on your CV</div>
+            </div>
+          </div>
+          <div class="skills-row"><span class="skill-badge ">Render</span><span class="skill-badge ">Vercel</span><span class="skill-badge ">Deployment</span><span class="skill-badge ">Domain setup</span><span class="skill-badge ">User testing</span></div>
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            <button class="mood-btn " onclick="setMood(event,9,0)" title="Tough">😤</button><button class="mood-btn " onclick="setMood(event,9,1)" title="Ok">😐</button><button class="mood-btn " onclick="setMood(event,9,2)" title="Good">🙂</button><button class="mood-btn " onclick="setMood(event,9,3)" title="On fire">🔥</button>
+          </div>
+        </div>
+      </div>
+    </div><div class="week" id="week-10">
+      <div class="week-left">
+        <div class="week-num-label">WK11</div>
+        <div class="week-dot p4"></div>
+      </div>
+      <div class="week-card" id="card-10">
+        <div class="week-card-header" onclick="toggleWeek(10)">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill pp4">Ship</span>
+              <span class="tp-both">Python + Drift</span>
+              
+            </div>
+            <div class="wch-title">🔄 Python Days 71–77 + Iterate</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">0/8</span>
+            <span class="chevron" id="chev-10">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-10">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              <div class="task-item" onclick="toggleTask(&#39;10-py-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 71–73: Advanced Python decorators</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;10-py-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 74–76: Automated testing</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;10-py-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 77: Higher order functions</div>
+      </div>
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              <div class="task-item" onclick="toggleTask(&#39;10-dr-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Fix top 3 things that confused test users</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;10-dr-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Add 10+ NZX tickers beyond initial 5</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;10-dr-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Write GitHub README + methodology doc</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;10-dr-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Record 2-min demo video</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;10-dr-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Share on LinkedIn — frame as learning project</div>
+      </div>
+            </div>
+          </div>
+          <div class="milestone-strip ms-p4">
+            <div class="ms-icon">🔄</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">Real people are using Drift and giving you feedback</div>
+            </div>
+          </div>
+          <div class="skills-row"><span class="skill-badge ">Testing</span><span class="skill-badge ">Iteration</span><span class="skill-badge ">LinkedIn</span><span class="skill-badge ">GitHub README</span><span class="skill-badge ">Demo recording</span></div>
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            <button class="mood-btn " onclick="setMood(event,10,0)" title="Tough">😤</button><button class="mood-btn " onclick="setMood(event,10,1)" title="Ok">😐</button><button class="mood-btn " onclick="setMood(event,10,2)" title="Good">🙂</button><button class="mood-btn " onclick="setMood(event,10,3)" title="On fire">🔥</button>
+          </div>
+        </div>
+      </div>
+    </div><div class="week" id="week-11">
+      <div class="week-left">
+        <div class="week-num-label">WK12</div>
+        <div class="week-dot p4"></div>
+      </div>
+      <div class="week-card" id="card-11">
+        <div class="week-card-header" onclick="toggleWeek(11)">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill pp4">Ship</span>
+              <span class="tp-both">Python + Drift</span>
+              
+            </div>
+            <div class="wch-title">🎯 Python Days 78–84 + CV &amp; Next Steps</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">0/8</span>
+            <span class="chevron" id="chev-11">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-11">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              <div class="task-item" onclick="toggleTask(&#39;11-py-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 78–80: GUIs + Tkinter</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;11-py-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 81–83: Advanced Python topics</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;11-py-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Day 84: Professional Python practices</div>
+      </div>
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              <div class="task-item" onclick="toggleTask(&#39;11-dr-0&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Update CV with Drift — link to URL + GitHub</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;11-dr-1&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Write 3 bullet points: what you built + learned</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;11-dr-2&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Prep interview story: problem → decisions → next</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;11-dr-3&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Cold email 5 Wellington finance firms with your URL</div>
+      </div><div class="task-item" onclick="toggleTask(&#39;11-dr-4&#39;)">
+        <div class="task-cb "></div>
+        <div class="task-txt ">Decide: keep building Drift or start something new?</div>
+      </div>
+            </div>
+          </div>
+          <div class="milestone-strip ms-p4">
+            <div class="ms-icon">🎯</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">Drift is on your CV, GitHub, LinkedIn — doors opening</div>
+            </div>
+          </div>
+          <div class="skills-row"><span class="skill-badge ">CV writing</span><span class="skill-badge ">Interview prep</span><span class="skill-badge ">Cold outreach</span><span class="skill-badge ">Product thinking</span></div>
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            <button class="mood-btn " onclick="setMood(event,11,0)" title="Tough">😤</button><button class="mood-btn " onclick="setMood(event,11,1)" title="Ok">😐</button><button class="mood-btn " onclick="setMood(event,11,2)" title="Good">🙂</button><button class="mood-btn " onclick="setMood(event,11,3)" title="On fire">🔥</button>
+          </div>
+        </div>
+      </div>
+    </div></div>
+</div>
+</div>
+
+<!-- MINDMAP -->
+<div id="mindmap-view" class="main">
+  <div class="mm-header">
+    <div class="page-title">Mind <span>map</span></div>
+    <div class="page-sub">Click any node to explore. Drag to move. Add your own ideas.</div>
+  </div>
+  <div class="mm-canvas-wrap">
+    <div class="mm-canvas" id="mm-canvas">
+      <svg class="mm-svg" id="mm-svg"><line x1="400" y1="290" x2="600" y2="145" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"></line><line x1="400" y1="290" x2="200" y2="145" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"></line><line x1="400" y1="290" x2="600" y2="435" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"></line><line x1="400" y1="290" x2="200" y2="435" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"></line><line x1="600" y1="145" x2="680" y2="290" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"></line><line x1="600" y1="145" x2="400" y2="87" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"></line><line x1="600" y1="145" x2="120" y2="290" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"></line><line x1="200" y1="145" x2="600" y2="145" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"></line><line x1="600" y1="435" x2="200" y2="435" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"></line></svg>
+    <div class="mm-node center " id="mm-center" style="left: 50%; top: 50%;"><div class="mm-node-title">Harry's Journey</div><div class="mm-node-sub">23 · Wellington · Building</div></div><div class="mm-node drift " id="mm-drift" style="left: 75%; top: 25%;"><div class="mm-node-title">Drift</div><div class="mm-node-sub">NZX/ASX price explainer</div></div><div class="mm-node python " id="mm-python" style="left: 25%; top: 25%;"><div class="mm-node-title">Python</div><div class="mm-node-sub">100 Days of Code</div></div><div class="mm-node career " id="mm-career" style="left: 75%; top: 75%;"><div class="mm-node-title">Career</div><div class="mm-node-sub">Trading / Analyst / Fintech</div></div><div class="mm-node future " id="mm-startup" style="left: 25%; top: 75%;"><div class="mm-node-title">Startup</div><div class="mm-node-sub">Long-term goal</div></div><div class="mm-node future " id="mm-agents" style="left: 85%; top: 50%;"><div class="mm-node-title">AI Agents</div><div class="mm-node-sub">Future feature</div></div><div class="mm-node future " id="mm-revenue" style="left: 50%; top: 15%;"><div class="mm-node-title">Revenue</div><div class="mm-node-sub">$10k/month goal</div></div><div class="mm-node drift " id="mm-nzx" style="left: 15%; top: 50%;"><div class="mm-node-title">NZX Edge</div><div class="mm-node-sub">Local market advantage</div></div></div>
+    <button class="mm-add-btn" onclick="addNode()">+ Add idea</button>
+  </div>
+  <div class="mm-detail" id="mm-detail">
+    <div class="mm-detail-title" id="mm-detail-title"></div>
+    <div id="mm-detail-body"></div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div id="chat-view" class="main">
+  <div class="chat-header">
+    <div class="page-title">AI <span>Chat</span></div>
+    <div class="page-sub">Talk to your timeline. Brainstorm ideas, get unstuck, explore where Drift could go.</div>
+  </div>
+  <div class="chat-context">
+    <div class="chat-context-label">Context active</div>
+    <div style="font-size:12px;color:var(--text2);">Harry · Wellington NZ · Building Drift (NZX/ASX price move explainer) · Python Day 3 · BCom finishing June</div>
+    <div class="context-tags">
+      <button class="ctx-tag active" id="ctx-drift">Drift project</button>
+      <button class="ctx-tag active" id="ctx-python">Python learning</button>
+      <button class="ctx-tag active" id="ctx-career">Career goals</button>
+    </div>
+  </div>
+  <div class="quick-prompts">
+    <button class="qp" onclick="quickPrompt(&#39;What should I focus on in Python this week to help build Drift faster?&#39;)">Python this week?</button>
+    <button class="qp" onclick="quickPrompt(&#39;What features could I add to Drift to make it more impressive to a trading firm?&#39;)">Impress trading firms</button>
+    <button class="qp" onclick="quickPrompt(&#39;Im feeling stuck and unmotivated, what should I do?&#39;)">Feeling stuck</button>
+    <button class="qp" onclick="quickPrompt(&#39;What are the biggest technical risks in my Drift build plan?&#39;)">Technical risks</button>
+    <button class="qp" onclick="quickPrompt(&#39;How could Drift eventually become a real business?&#39;)">Drift as a business</button>
+    <button class="qp" onclick="quickPrompt(&#39;What Python concept should I learn today that will directly help with Drift?&#39;)">What to learn today</button>
+  </div>
+  <div class="chat-window">
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg ai">
+        <div class="msg-label">Drift AI</div>
+        Hey Harry — I'm your project AI. Ask me anything about Drift, Python, your career, or where this whole thing is headed. I know your full context so no need to explain yourself.
+      </div>
+    </div>
+    <div class="chat-input-wrap">
+      <textarea class="chat-input" id="chat-input" placeholder="Ask anything about your project, Python, career..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="chat-send" id="send-btn" onclick="sendChat()">Send ↗</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="save-flash" id="save-flash">✓ saved</div>
+
+<script>
+// ============ DATA ============
+const WEEKS = [
+  {
+    week:1, phase:1, phaseLabel:'Foundation', type:'both',
+    title:'Setup + Python Days 1–7',
+    skills:['Python basics','VS Code','yfinance','pandas','GitHub'],
+    pythonTasks:['Review Days 1–3 (printing, variables, strings)','Day 4: Randomisation & lists','Day 5: Loops','Day 6: Functions & Karel','Day 7: Hangman project'],
+    driftTasks:['Install VS Code + Python 3.11','Create GitHub repo + drift/ folder','pip install yfinance pandas','Pull first NZX price with yfinance','Explore a pandas DataFrame'],
+    milestone:'You can write basic Python AND pull live NZX price data',
+    icon:'⚡'
+  },
+  {
+    week:2, phase:1, phaseLabel:'Foundation', type:'both',
+    title:'Python Days 8–14 + Move Detection',
+    skills:['Functions','File I/O','CSV handling','Data validation'],
+    pythonTasks:['Day 8–9: Caesar cipher + functions','Day 10–11: Blackjack project','Day 12–14: Scope, closures, debugging'],
+    driftTasks:['Write detect_move() function — flags >2% daily moves','Handle missing data + public holidays','Test on 5 NZX tickers','Log detected moves to CSV','Commit cleanly to GitHub'],
+    milestone:'Drift automatically flags significant price moves',
+    icon:'📡'
+  },
+  {
+    week:3, phase:1, phaseLabel:'Foundation', type:'both',
+    title:'Python Days 15–21 + Macro Pipeline',
+    skills:['APIs','JSON','Data alignment','Pandas merging'],
+    pythonTasks:['Day 15–17: Local dev + coffee machine OOP','Day 18–20: Turtle graphics + GUI','Day 21: Snake game'],
+    driftTasks:['Pull Brent crude oil data via API','Pull NZD/USD exchange rate daily','Pull NZ 10yr bond yield','Align all data sources to same timestamps','Map sectors: AIR.NZ=crude, CEN.NZ=hydrology'],
+    milestone:'Multi-source macro data pipeline running',
+    icon:'🔗'
+  },
+  {
+    week:4, phase:2, phaseLabel:'Core Build', type:'both',
+    title:'Python Days 22–28 + Causal Logic',
+    skills:['Correlation logic','OOP','Data modelling','Backtesting'],
+    pythonTasks:['Day 22–24: Pong game','Day 25–26: US States game','Day 27–28: Tkinter + pandas data analysis'],
+    driftTasks:['Define causal factor library (crude, FX, sector, earnings)','Write correlation logic for factor ranking','Hard-code sector mappings for 10 NZX tickers','Back-test logic against 20 historical moves','Document methodology — you need this for interviews'],
+    milestone:'First AI-generated causal explanation from real data',
+    icon:'🧠'
+  },
+  {
+    week:5, phase:2, phaseLabel:'Core Build', type:'both',
+    title:'Python Days 29–35 + Claude API',
+    skills:['Claude API','Prompt engineering','Error handling','Auth patterns'],
+    pythonTasks:['Day 29–31: Password manager','Day 32–34: Automated birthday emailer','Day 35: Keys + authentication patterns'],
+    driftTasks:['Sign up for Anthropic API key','Send causal data to Claude API','Prompt engineer: structured input → ranked explanation','Handle API errors + rate limits','Compare AI output vs manual — refine prompt'],
+    milestone:'End-to-end: price move → causes ranked → AI summary',
+    icon:'🤖'
+  },
+  {
+    week:6, phase:2, phaseLabel:'Core Build', type:'both',
+    title:'Python Days 36–42 + Confidence Scoring',
+    skills:['Statistical scoring','Methodology design','Testing','Documentation'],
+    pythonTasks:['Day 36–38: Stock trading news alert project','Day 39–41: Flight deal finder','Day 42: Data structures deep dive'],
+    driftTasks:['Design confidence scoring methodology','Implement: correlation strength + data quality scoring','Add High/Medium/Low labels to every factor','Back-test scores against 30 historical moves','Write up methodology in plain English'],
+    milestone:'Every explanation has a defensible confidence score',
+    icon:'📊'
+  },
+  {
+    week:7, phase:2, phaseLabel:'Core Build', type:'both',
+    title:'Python Days 43–49 + Database',
+    skills:['Supabase','SQL','Web scraping','Data persistence'],
+    pythonTasks:['Day 43–45: Web scraping with BeautifulSoup','Day 46–48: Spotify playlist automation','Day 49: Web scraping capstone'],
+    driftTasks:['Set up Supabase free tier','Store every detected move + explanation + timestamp','Write query: show AIR.NZ moves last 6 months','Backfill 3 months historical data for 5 tickers','Test querying + fix edge cases'],
+    milestone:'Drift has memory — patterns start to emerge',
+    icon:'🗄️'
+  },
+  {
+    week:8, phase:3, phaseLabel:'Polish', type:'drift',
+    title:'Python Days 50–56 + Frontend UI',
+    skills:['Flask','React','HTML/CSS','REST APIs','UI design'],
+    pythonTasks:['Day 50–52: Flask introduction','Day 53–55: REST APIs + Flask','Day 56: Rendering HTML with Flask'],
+    driftTasks:['Set up React project (or HTML/CSS)','Build live feed screen — today\'s significant moves','Build explainer screen — factors + confidence bars','Basic navigation between screens','Use your HTML/CSS experience here'],
+    milestone:'Drift looks like a real product someone can open and use',
+    icon:'🎨'
+  },
+  {
+    week:9, phase:3, phaseLabel:'Polish', type:'drift',
+    title:'Python Days 57–63 + History & Patterns',
+    skills:['Jinja templates','Pattern detection','Mobile CSS','Full-stack'],
+    pythonTasks:['Day 57–59: Jinja templates + blog project','Day 60–62: POST requests + forms','Day 63: SQLite databases with Flask'],
+    driftTasks:['Build history screen — searchable explanation log','Write pattern detection logic per ticker','Build patterns screen — insights that compound','Connect all screens to Supabase','Make it mobile responsive'],
+    milestone:'All four screens live with real data',
+    icon:'🔍'
+  },
+  {
+    week:10, phase:4, phaseLabel:'Ship', type:'drift',
+    title:'Python Days 64–70 + Deploy Live',
+    skills:['Render','Vercel','Deployment','Domain setup','User testing'],
+    pythonTasks:['Day 64–66: Flask + SQLAlchemy','Day 67–69: Authentication + users','Day 70: Blog with users capstone'],
+    driftTasks:['Deploy backend to Render free tier','Deploy frontend to Vercel free tier','Buy domain if you want (drift.co.nz?)','End-to-end test on live URL — break it intentionally','Send URL to 3 people — watch them use it'],
+    milestone:'🚀 DRIFT IS LIVE — real URL, goes on your CV',
+    icon:'🚀'
+  },
+  {
+    week:11, phase:4, phaseLabel:'Ship', type:'both',
+    title:'Python Days 71–77 + Iterate',
+    skills:['Testing','Iteration','LinkedIn','GitHub README','Demo recording'],
+    pythonTasks:['Day 71–73: Advanced Python decorators','Day 74–76: Automated testing','Day 77: Higher order functions'],
+    driftTasks:['Fix top 3 things that confused test users','Add 10+ NZX tickers beyond initial 5','Write GitHub README + methodology doc','Record 2-min demo video','Share on LinkedIn — frame as learning project'],
+    milestone:'Real people are using Drift and giving you feedback',
+    icon:'🔄'
+  },
+  {
+    week:12, phase:4, phaseLabel:'Ship', type:'both',
+    title:'Python Days 78–84 + CV & Next Steps',
+    skills:['CV writing','Interview prep','Cold outreach','Product thinking'],
+    pythonTasks:['Day 78–80: GUIs + Tkinter','Day 81–83: Advanced Python topics','Day 84: Professional Python practices'],
+    driftTasks:['Update CV with Drift — link to URL + GitHub','Write 3 bullet points: what you built + learned','Prep interview story: problem → decisions → next','Cold email 5 Wellington finance firms with your URL','Decide: keep building Drift or start something new?'],
+    milestone:'Drift is on your CV, GitHub, LinkedIn — doors opening',
+    icon:'🎯'
+  },
+];
+
+// ============ STORAGE ============
+const KEY = 'drift-smart-v2';
+let state = {checked:{}, pyDay:3};
+
+function save(){
+  localStorage.setItem(KEY, JSON.stringify(state));
+  const f = document.getElementById('save-flash');
+  f.classList.add('show');
+  setTimeout(()=>f.classList.remove('show'), 1800);
+}
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw) state = JSON.parse(raw);
+  }catch(e){state={checked:{},pyDay:3};}
+}
+
+// ============ STATS ============
+function totalTasks(){return WEEKS.reduce((a,w)=>a+w.pythonTasks.length+w.driftTasks.length,0);}
+function doneTasks(){return Object.values(state.checked).filter(Boolean).length;}
+function updateStats(){
+  const done = doneTasks();
+  const total = totalTasks();
+  const pct = Math.round(done/total*100);
+  document.getElementById('tasks-stat').textContent = done+'/'+total;
+  document.getElementById('pct-label').textContent = pct+'%';
+  document.getElementById('prog-fill').style.width = pct+'%';
+  // current drift week
+  let dw = 1;
+  for(let i=0;i<WEEKS.length;i++){
+    const allDone = [...WEEKS[i].pythonTasks,...WEEKS[i].driftTasks].every((_,ti)=>state.checked[i+'-py-'+ti]||state.checked[i+'-dr-'+ti]);
+    if(!allDone){dw=i+1;break;}
+    dw=i+2;
+  }
+  document.getElementById('drift-week').textContent = Math.min(dw,12);
+  document.getElementById('py-day').textContent = state.pyDay || 3;
+}
+
+// ============ TIMELINE ============
+function weekTasksDone(wi){
+  const w = WEEKS[wi];
+  const total = w.pythonTasks.length + w.driftTasks.length;
+  const done = w.pythonTasks.filter((_,ti)=>state.checked[wi+'-py-'+ti]).length +
+               w.driftTasks.filter((_,ti)=>state.checked[wi+'-dr-'+ti]).length;
+  return {done,total};
+}
+
+function renderTimeline(){
+  const container = document.getElementById('timeline-blocks');
+  container.innerHTML = WEEKS.map((w,wi)=>{
+    const {done,total} = weekTasksDone(wi);
+    const isComplete = done===total;
+    const phaseClass = 'p'+w.phase;
+    const pillClass = 'pp'+w.phase;
+    const typeLabel = w.type==='both'?'Python + Drift':w.type==='drift'?'Drift':'Python';
+    const typePill = w.type==='both'?'tp-both':w.type==='drift'?'tp-drift':'tp-py';
+    const msClass = 'ms-p'+w.phase;
+
+    const pyTasks = w.pythonTasks.map((t,ti)=>{
+      const key = wi+'-py-'+ti;
+      const ck = !!state.checked[key];
+      return `<div class="task-item" onclick="toggleTask('${key}')">
+        <div class="task-cb ${ck?'done':''}">${ck?'✓':''}</div>
+        <div class="task-txt ${ck?'done':''}">${t}</div>
+      </div>`;
+    }).join('');
+
+    const drTasks = w.driftTasks.map((t,ti)=>{
+      const key = wi+'-dr-'+ti;
+      const ck = !!state.checked[key];
+      return `<div class="task-item" onclick="toggleTask('${key}')">
+        <div class="task-cb ${ck?'done':''}">${ck?'✓':''}</div>
+        <div class="task-txt ${ck?'done':''}">${t}</div>
+      </div>`;
+    }).join('');
+
+    const mood = state.moods && state.moods[wi];
+    const moodBtns = ['😤','😐','🙂','🔥'].map((m,mi)=>
+      `<button class="mood-btn ${mood===mi?'active':''}" onclick="setMood(event,${wi},${mi})" title="${['Tough','Ok','Good','On fire'][mi]}">${m}</button>`
+    ).join('');
+
+    const skills = w.skills||[];
+    const skillBadges = skills.length ? `<div class="skills-row">${skills.map(s=>`<span class="skill-badge ${isComplete?'earned':''}">${s}</span>`).join('')}</div>` : '';
+
+    return `<div class="week" id="week-${wi}">
+      <div class="week-left">
+        <div class="week-num-label">WK${w.week}</div>
+        <div class="week-dot ${isComplete?'complete':phaseClass}"></div>
+      </div>
+      <div class="week-card" id="card-${wi}">
+        <div class="week-card-header" onclick="toggleWeek(${wi})">
+          <div class="wch-left">
+            <div class="wch-meta">
+              <span class="phase-pill ${pillClass}">${w.phaseLabel}</span>
+              <span class="${typePill}">${typeLabel}</span>
+              ${isComplete?'<span style="font-family:JetBrains Mono,monospace;font-size:9px;background:var(--green-glow);color:var(--green);padding:2px 8px;border-radius:20px;">✓ done</span>':''}
+            </div>
+            <div class="wch-title">${w.icon} ${w.title}</div>
+          </div>
+          <div class="wch-right">
+            <span class="wch-prog">${done}/${total}</span>
+            <span class="chevron" id="chev-${wi}">▼</span>
+          </div>
+        </div>
+        <div class="week-body" id="body-${wi}">
+          <div class="tasks-grid">
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--amber);flex-shrink:0;"></div>100 Days of Code</div>
+              ${pyTasks}
+            </div>
+            <div class="tasks-col">
+              <div class="tasks-col-label"><div class="col-dot" style="background:var(--blue);flex-shrink:0;"></div>Drift Project</div>
+              ${drTasks}
+            </div>
+          </div>
+          <div class="milestone-strip ${msClass}">
+            <div class="ms-icon">${w.icon}</div>
+            <div class="ms-text-wrap">
+              <div class="ms-label">Week milestone</div>
+              <div class="ms-text">${w.milestone}</div>
+            </div>
+          </div>
+          ${skillBadges}
+          <div class="mood-row">
+            <span class="mood-label">Week vibe</span>
+            ${moodBtns}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleWeek(wi){
+  const body = document.getElementById('body-'+wi);
+  const chev = document.getElementById('chev-'+wi);
+  const card = document.getElementById('card-'+wi);
+  const isOpen = body.classList.contains('show');
+  body.classList.toggle('show',!isOpen);
+  chev.classList.toggle('open',!isOpen);
+  card.classList.toggle('open',!isOpen);
+}
+
+function incPyDay(){
+  state.pyDay = Math.min(100, (state.pyDay||3)+1);
+  save();
+  updateStats();
+}
+
+function toggleTask(key){
+  state.checked[key] = !state.checked[key];
+  save();
+  updateStats();
+  renderTimeline();
+}
+
+function setMood(e,wi,mi){
+  e.stopPropagation();
+  if(!state.moods) state.moods={};
+  state.moods[wi] = state.moods[wi]===mi ? null : mi;
+  save();
+  renderTimeline();
+}
+
+// ============ MINDMAP ============
+const NODES = [
+  {id:'center',x:50,y:50,type:'center',title:'Harry\'s Journey',sub:'23 · Wellington · Building'},
+  {id:'drift',x:75,y:25,type:'drift',title:'Drift',sub:'NZX/ASX price explainer',detail:'Your core portfolio project. AI-powered, built in 12 weeks. Detects moves, ranks causes, confidence-scored. The live URL that opens doors.'},
+  {id:'python',x:25,y:25,type:'python',title:'Python',sub:'100 Days of Code',detail:'Day 3 of 100. By Day 50 you\'ll have enough to build Drift\'s full backend. Keep the daily habit — consistency compounds.'},
+  {id:'career',x:75,y:75,type:'career',title:'Career',sub:'Trading / Analyst / Fintech',detail:'Wellington first: ANZ, Westpac, Jarden, Forsyth Barr. Sydney later. Drift is the differentiator. One good project beats a dozen courses.'},
+  {id:'startup',x:25,y:75,type:'future',title:'Startup',sub:'Long-term goal',detail:'The entrepreneur path. Drift might become it, or Drift teaches you to build the thing that does. Skills compound regardless.'},
+  {id:'agents',x:85,y:50,type:'future',title:'AI Agents',sub:'Future feature',detail:'Drift backtesting agent. Runs continuously, monitors strategies, reports win/loss. A natural Week 8-10 addition once the core is built.'},
+  {id:'revenue',x:50,y:15,type:'future',title:'Revenue',sub:'$10k/month goal',detail:'B2B path: sell Drift to financial advisers or broking firms. 20 clients at $500/month. The product sells itself once there\'s a live URL to show.'},
+  {id:'nzx',x:15,y:50,type:'drift',title:'NZX Edge',sub:'Local market advantage',detail:'Global tools ignore NZX. You know this market from the inside. CEN.NZ hydrology, AIR.NZ crude sensitivity — this local knowledge is your moat.'},
+];
+
+const EDGES = [
+  ['center','drift'],['center','python'],['center','career'],['center','startup'],
+  ['drift','agents'],['drift','revenue'],['drift','nzx'],['python','drift'],['career','startup'],
+];
+
+let selectedNode = null;
+let dragging = null;
+let nodePositions = {};
+
+function initMindmap(){
+  const saved = localStorage.getItem('drift-mm-pos');
+  if(saved){
+    try{nodePositions=JSON.parse(saved);}catch(e){}
+  }
+  NODES.forEach(n=>{
+    if(!nodePositions[n.id]) nodePositions[n.id]={x:n.x,y:n.y};
+  });
+  renderMindmap();
+}
+
+function renderMindmap(){
+  const canvas = document.getElementById('mm-canvas');
+  const svg = document.getElementById('mm-svg');
+  const W = canvas.offsetWidth || 800;
+  const H = canvas.offsetHeight || 580;
+
+  // Draw edges
+  svg.innerHTML = EDGES.map(([a,b])=>{
+    const na = nodePositions[a]||{x:50,y:50};
+    const nb = nodePositions[b]||{x:50,y:50};
+    const x1 = na.x/100*W; const y1 = na.y/100*H;
+    const x2 = nb.x/100*W; const y2 = nb.y/100*H;
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"/>`;
+  }).join('');
+
+  // Remove old nodes
+  canvas.querySelectorAll('.mm-node').forEach(n=>n.remove());
+
+  // Draw nodes
+  NODES.forEach(n=>{
+    const pos = nodePositions[n.id]||{x:n.x,y:n.y};
+    const el = document.createElement('div');
+    el.className = `mm-node ${n.type} ${selectedNode===n.id?'selected':''}`;
+    el.id = 'mm-'+n.id;
+    el.style.left = pos.x+'%';
+    el.style.top = pos.y+'%';
+    el.innerHTML = `<div class="mm-node-title">${n.title}</div><div class="mm-node-sub">${n.sub}</div>`;
+    el.onclick = ()=>selectNode(n.id);
+    el.onmousedown = (e)=>startDrag(e,n.id);
+    canvas.appendChild(el);
+  });
+}
+
+function selectNode(id){
+  selectedNode = id;
+  const node = NODES.find(n=>n.id===id);
+  if(!node) return;
+  const detail = document.getElementById('mm-detail');
+  document.getElementById('mm-detail-title').textContent = node.title;
+  document.getElementById('mm-detail-body').textContent = node.detail || node.sub;
+  detail.classList.add('show');
+  renderMindmap();
+}
+
+function startDrag(e,id){
+  e.preventDefault();
+  dragging = id;
+  const canvas = document.getElementById('mm-canvas');
+  const rect = canvas.getBoundingClientRect();
+  function onMove(ev){
+    if(!dragging) return;
+    const x = Math.max(5,Math.min(95,(ev.clientX-rect.left)/rect.width*100));
+    const y = Math.max(5,Math.min(95,(ev.clientY-rect.top)/rect.height*100));
+    nodePositions[dragging]={x,y};
+    renderMindmap();
+  }
+  function onUp(){
+    dragging=null;
+    localStorage.setItem('drift-mm-pos',JSON.stringify(nodePositions));
+    document.removeEventListener('mousemove',onMove);
+    document.removeEventListener('mouseup',onUp);
+  }
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onUp);
+}
+
+function addNode(){
+  const title = prompt('New idea or feature:');
+  if(!title) return;
+  const sub = prompt('Brief description:') || '';
+  const id = 'custom-'+Date.now();
+  NODES.push({id,x:50,y:40,type:'future',title,sub,detail:sub});
+  nodePositions[id]={x:50,y:40};
+  EDGES.push(['center',id]);
+  localStorage.setItem('drift-mm-pos',JSON.stringify(nodePositions));
+  renderMindmap();
+}
+
+// ============ CHAT ============
+const SYSTEM = `You are an AI advisor embedded in Harry's personal project dashboard called Drift. 
+
+Harry's profile:
+- 23 years old, Wellington NZ
+- Finishing BCom at Victoria University (accounting, finance, commercial law) — last exam June 12
+- Works part-time in Accounts Payable at KiwiRail (SAP + Esker)
+- Manages Xero/GST for partner Lucy's sole-trader midwifery business
+- Currently on Python Day 3 of 100 Days of Code (Udemy, Angela Yu)
+- Prior HTML/CSS experience
+- Just purchased Claude Pro
+
+Project: Drift
+- AI-powered price move explainer for NZX/ASX stocks
+- Detects significant moves, ranks causal factors with confidence scoring, generates AI summaries
+- Tech stack: Python, yfinance, pandas, FastAPI, Claude API, Supabase, React, Vercel
+- 12-week roadmap, ~8hrs/week, target ship Week 10
+
+Goals: Break into trading/finance/analyst roles in Wellington or Sydney. Long-term: build own startup in AI/fintech. $10k/month revenue eventually.
+
+Your role: Be a smart, direct, encouraging but honest advisor. Keep responses concise and actionable. You know Harry's full context so never ask him to re-explain himself. Be like a senior developer + finance mentor combined. Don't be sycophantic. Push back when needed.`;
+
+async function sendChat(){
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if(!msg) return;
+  input.value='';
+  autoResize(input);
+  addMsg(msg,'user');
+  const btn = document.getElementById('send-btn');
+  btn.disabled=true;
+  const thinking = addMsg('Thinking...','ai thinking');
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:SYSTEM,
+        messages:[{role:'user',content:msg}]
+      })
+    });
+    const data = await res.json();
+    thinking.className='msg ai';
+    thinking.innerHTML=`<div class="msg-label">Drift AI</div>${(data.content?.[0]?.text||'No response.').replace(/\n/g,'<br>')}`;
+  }catch(e){
+    thinking.className='msg ai';
+    thinking.innerHTML=`<div class="msg-label">Drift AI</div>Error reaching API. Check your connection.`;
+  }
+  btn.disabled=false;
+  scrollChat();
+}
+
+function addMsg(text,role){
+  const box = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  if(role==='ai') div.innerHTML=`<div class="msg-label">Drift AI</div>${text}`;
+  else div.textContent=text;
+  box.appendChild(div);
+  scrollChat();
+  return div;
+}
+
+function scrollChat(){
+  const box = document.getElementById('chat-messages');
+  box.scrollTop = box.scrollHeight;
+}
+
+function quickPrompt(text){
+  document.getElementById('chat-input').value=text;
+  sendChat();
+}
+
+function handleKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}
+}
+
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,120)+'px';
+}
+
+// ============ VIEW SWITCHING ============
+function showView(name){
+  document.querySelectorAll('.main').forEach(m=>m.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(name+'-view').classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>{
+    if(t.textContent.toLowerCase().includes(name.split('-')[0])) t.classList.add('active');
+  });
+  if(name==='mindmap') setTimeout(renderMindmap,50);
+}
+
+// ============ INIT ============
+load();
+renderTimeline();
+updateStats();
+initMindmap();
+</script>
+
+
+</body></html>
