@@ -24,9 +24,10 @@ nzd_usd = macro_data("NZDUSD=X")
 ten_year_rate = macro_data("^TNX")
 air_nz = macro_data("AIR.NZ")
 
-result = pd.concat([oil, nzd_usd, ten_year_rate, air_nz], keys=["Oil", "NZD/USD", "10-Yr Rate", "AIR.NZ"], axis=1)
-correlation = result["AIR.NZ"]["PCT Change %"].corr(result["Oil"]["PCT Change %"])
-print(correlation)
+result = pd.concat([oil, nzd_usd, ten_year_rate, air_nz], keys=["Oil", "NZD/USD", "ten-yr-rate", "AIR.NZ"], axis=1)
+for lag in range(0, 11):
+    correlation = result["AIR.NZ"]["PCT Change %"].corr(result["ten-yr-rate"]["PCT Change %"].shift(lag))
+    print(correlation)
 print(result)
 if result is not None:
     result.to_csv(r"C:\Users\harry\Desktop\Drift\macro_data.csv")
