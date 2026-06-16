@@ -18,7 +18,7 @@ def detect_move(ticker, threshold=2):
     df["ticker"] = ticker
     return df
 
-result = detect_move("BZ=F")
+result = detect_move("AIR.NZ")
 print(result)
 if result is not None:
     result.to_csv(r"C:\Users\harry\Desktop\Drift\significant_moves.csv")
