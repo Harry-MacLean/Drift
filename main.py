@@ -6,7 +6,7 @@ from news_correlation import news_correlation, confirm_correlation
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "http://localhost:5174"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -29,5 +29,5 @@ def get_chain(ticker: str, date: str):
     start = candidates_raw.find('[')
     end = candidates_raw.rfind(']') + 1
     clean_json = candidates_raw[start:end]
-    verified_candidates = confirm_correlation(json.loads(clean_json), date)
+    verified_candidates = confirm_correlation(json.loads(clean_json), date, ticker)
     return verified_candidates

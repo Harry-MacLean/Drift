@@ -42,13 +42,16 @@ def news_correlation(ticker, date, news_articles):
 
 
 
-def confirm_correlation(parsed, date):
-    
+def confirm_correlation(parsed, date, ticker):
+    og_ticker = yf.Ticker(ticker).info.get("longName")
     confirmed = []
     for company in parsed:
         ticker_adjustment = company['ticker'].replace(".ASX", ".AX").replace(".NZX", ".NZ")
         chain = detect_move(ticker_adjustment)
         if chain is None:
+            continue
+        candidate_name = yf.Ticker(ticker_adjustment).info.get("longName")
+        if candidate_name == og_ticker:
             continue
         for dates in chain.index:
             if dates <= pd.to_datetime(date).date() and dates >= pd.to_datetime(date).date() - pd.Timedelta(days=2):
