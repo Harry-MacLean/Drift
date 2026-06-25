@@ -3,6 +3,7 @@ app = FastAPI()
 from fastapi.middleware.cors import CORSMiddleware
 import json
 from news_correlation import news_correlation, confirm_correlation
+from recent_movers import get_recent_movers
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,3 +32,8 @@ def get_chain(ticker: str, date: str):
     clean_json = candidates_raw[start:end]
     verified_candidates = confirm_correlation(json.loads(clean_json), date, ticker)
     return verified_candidates
+
+@app.get("/recent")
+def get_recent():
+    return get_recent_movers()
+    
