@@ -25,7 +25,7 @@ def explanation(ticker: str, date: str):
                     prompt = f"Ticker: {ticker} | Move: {result.loc[spike_date, 'PCT Change %']} | Spike: {spike_date} | News: {article['content']['title']} | Message: {'Websearch the news articles provided, correlate the recent stock movement to them and explain the possible reasons for the movement. If there is no correlation, do not create one. Structure your message concisely.'}"
                     message = client.messages.create(
                         model="claude-sonnet-4-6",
-                        max_tokens=200,
+                        max_tokens=300,
                         tools=[
                             {
                                 "type": "web_search_20250305",
@@ -39,3 +39,4 @@ def explanation(ticker: str, date: str):
                     )
                     full_response = "".join([block.text for block in message.content if hasattr(block, 'text')])
                     return(full_response)
+    return "No news articles found within two day threshold of the spike date. Please try another date."

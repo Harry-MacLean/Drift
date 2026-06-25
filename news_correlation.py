@@ -25,7 +25,7 @@ def news_correlation(ticker, date, news_articles):
 
     message = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=2048,
+        max_tokens=4096,
         tools=[
             {
             "type": "web_search_20250305",
