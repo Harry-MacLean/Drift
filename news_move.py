@@ -10,8 +10,17 @@ api_key = os.getenv("ANTHROPIC_API_KEY")
 #print(api_key)
 client = anthropic.Anthropic(api_key=api_key)
 
-def explanation(ticker: str, date: str):
+def news_available(ticker, date):
+    stock = yf.Ticker(ticker)
+    spike_date = pd.to_datetime(date).date()
+    for article in stock.news:
+        article_date = pd.to_datetime(article['content']['pubDate']).date()
+        if article_date <= spike_date and article_date >= spike_date - pd.Timedelta(days=2):
+            return True
+    return False
 
+
+def explanation(ticker: str, date: str):
     stock = yf.Ticker(ticker)
     result = detect_move(ticker)
     for dates in result.index:
@@ -22,10 +31,10 @@ def explanation(ticker: str, date: str):
                 if article_date <= spike_date and article_date >= spike_date - pd.Timedelta(days=2):
                     print(f"Spike: {spike_date} | News: {article['content']['title']}")
             
-                    prompt = f"Ticker: {ticker} | Move: {result.loc[spike_date, 'PCT Change %']} | Spike: {spike_date} | News: {article['content']['title']} | Message: {'Websearch the news articles provided, correlate the recent stock movement to them and explain the possible reasons for the movement. If there is no correlation, do not create one. Structure your message concisely.'}"
+                    prompt = f"Ticker: {ticker} | Move: {result.loc[spike_date, 'PCT Change %']}% | Spike: {spike_date} | News: {article['content']['title']} | Message: Websearch the news article provided and explain why {ticker} moved {result.loc[spike_date, 'PCT Change %']}% on {spike_date}. Structure your response with clear headers and bullet points covering: (1) what the news said, (2) how it connects to the price move, (3) a very brief conclusion. Keep each section concise — 2 short bullets maximum per section. If you are approaching your response limit, wrap up your current section with a concluding sentence rather than starting a new section. Never cut off mid-sentence or mid-bullet. No emojis."
                     message = client.messages.create(
                         model="claude-sonnet-4-6",
-                        max_tokens=300,
+                        max_tokens=600,
                         tools=[
                             {
                                 "type": "web_search_20250305",

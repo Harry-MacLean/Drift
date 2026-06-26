@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import json
 from news_correlation import news_correlation, confirm_correlation
 from recent_movers import get_recent_movers
+from news_move import news_available
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,4 +37,8 @@ def get_chain(ticker: str, date: str):
 @app.get("/recent")
 def get_recent():
     return get_recent_movers()
+
+@app.get("/news_available/{ticker}/{date}")
+def get_news_availability(ticker: str, date: str):
+    return news_available(ticker, date)
     

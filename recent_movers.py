@@ -17,4 +17,3 @@ def get_recent_movers():
                 })
     recent_movers.sort(key=lambda x: x["date"], reverse=True)
     return recent_movers[:5]
-print(get_recent_movers())
