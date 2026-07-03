@@ -5,6 +5,7 @@ import json
 from news_correlation import news_correlation, confirm_correlation
 from recent_movers import get_recent_movers
 from news_move import news_available
+from fastapi.responses import StreamingResponse
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,18 +22,32 @@ def get_moves(ticker: str):
 
 @app.get("/explain/{ticker}/{date}")
 def get_explanation(ticker: str, date: str):
-    return explanation(ticker, date)
+    return StreamingResponse(explanation(ticker, date), media_type="text/plain")
+
+
+def chain_generator(ticker, date):
+    yield "Analysing price move...\n"
+
+    full_explanation = ""
+    for chunk in explanation(ticker, date):
+        full_explanation += chunk
+        
+    yield "Searching for correlated stocks...\n"
+    candidates_raw = news_correlation(ticker, date, full_explanation)
+    start = candidates_raw.find('[')
+    end = candidates_raw.rfind(']') + 1
+    clean_json = candidates_raw[start:end]
+
+    yield "Verifying against real price data...\n"
+    verified_candidates = confirm_correlation(json.loads(clean_json), date, ticker)
+
+    yield json.dumps(verified_candidates)
+
 
 
 @app.get("/chain/{ticker}/{date}")
 def get_chain(ticker: str, date: str):
-    cause = explanation(ticker, date)
-    candidates_raw = news_correlation(ticker, date, cause)
-    start = candidates_raw.find('[')
-    end = candidates_raw.rfind(']') + 1
-    clean_json = candidates_raw[start:end]
-    verified_candidates = confirm_correlation(json.loads(clean_json), date, ticker)
-    return verified_candidates
+    return StreamingResponse(chain_generator(ticker, date), media_type="text/plain")
 
 @app.get("/recent")
 def get_recent():

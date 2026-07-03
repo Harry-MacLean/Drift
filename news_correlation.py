@@ -57,7 +57,7 @@ def confirm_correlation(parsed, date, ticker):
             if dates <= pd.to_datetime(date).date() and dates >= pd.to_datetime(date).date() - pd.Timedelta(days=2):
                 confirmed.append({
                     "ticker": ticker_adjustment,
-                    "date": dates,
+                    "date": str(dates),
                     "spike": float(chain.loc[dates, 'PCT Change %']),
                     "news": company['news']
                 })
