@@ -55,12 +55,14 @@ def confirm_correlation(parsed, date, ticker):
             continue
         for dates in chain.index:
             if dates <= pd.to_datetime(date).date() and dates >= pd.to_datetime(date).date() - pd.Timedelta(days=2):
-                confirmed.append({
-                    "ticker": ticker_adjustment,
-                    "date": str(dates),
-                    "spike": float(chain.loc[dates, 'PCT Change %']),
-                    "news": company['news']
-                })
+                existing_tickers = [c["ticker"] for c in confirmed]
+                if ticker_adjustment not in existing_tickers:
+                    confirmed.append({
+                        "ticker": ticker_adjustment,
+                        "date": str(dates),
+                        "spike": float(chain.loc[dates, 'PCT Change %']),
+                        "news": company['news']
+                    })
     return(confirmed)
 
 

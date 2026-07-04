@@ -15,23 +15,24 @@ def news_available(ticker, date):
     spike_date = pd.to_datetime(date).date()
     for article in stock.news:
         article_date = pd.to_datetime(article['content']['pubDate']).date()
-        print(f"Article date: {article_date}, Spike date: {spike_date}")
         if article_date <= spike_date and article_date >= spike_date - pd.Timedelta(days=2):
             return True
     return False
 
 
+
 def explanation(ticker: str, date: str):
     stock = yf.Ticker(ticker)
     result = detect_move(ticker)
+    article_found = False
+    
     for dates in result.index:
         spike_date = dates
         if spike_date == pd.to_datetime(date).date():
             for article in stock.news:
                 article_date = pd.to_datetime(article['content']['pubDate']).date()
                 if article_date <= spike_date and article_date >= spike_date - pd.Timedelta(days=2):
-                    print(f"Spike: {spike_date} | News: {article['content']['title']}")
-            
+                    article_found = True
                     prompt = f"Ticker: {ticker} | Move: {result.loc[spike_date, 'PCT Change %']}% | Spike: {spike_date} | News: {article['content']['title']} | Message: Websearch the news article provided and explain why {ticker} moved {result.loc[spike_date, 'PCT Change %']}% on {spike_date}. Structure your response with clear headers and bullet points covering: (1) what the news said, (2) how it connects to the price move, (3) a very brief conclusion. Keep each section concise — 2 short bullets maximum per section. If you are approaching your response limit, wrap up your current section with a concluding sentence rather than starting a new section. Never cut off mid-sentence or mid-bullet. No emojis."
                     with client.messages.stream(
                         model="claude-sonnet-4-6",
@@ -45,9 +46,11 @@ def explanation(ticker: str, date: str):
                         messages=[
                             {"role": "user", "content": prompt}
                         ]
-
                     ) as stream:
                         for text in stream.text_stream:
                             yield text
-                    
-    yield "No news articles found within two day threshold of the spike date. Please try another date."
+                    break
+            break
+
+    if not article_found:
+        yield "No news articles found within two day threshold of the spike date. Please try another date."

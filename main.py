@@ -6,6 +6,21 @@ from news_correlation import news_correlation, confirm_correlation
 from recent_movers import get_recent_movers
 from news_move import news_available
 from fastapi.responses import StreamingResponse
+from supabase import create_client
+import os
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+def get_cached_explanation(ticker, date):
+    result = supabase.table("cache").select("explanation").eq("ticker", ticker).eq("date", date).execute()
+    if result.data:
+        return result.data[0]["explanation"]
+    return None
+
+def save_explanation_cache(ticker, date, explanation_text):
+    supabase.table("cache").insert({"ticker": ticker, "date": date, "explanation": explanation_text}).execute()
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,7 +37,19 @@ def get_moves(ticker: str):
 
 @app.get("/explain/{ticker}/{date}")
 def get_explanation(ticker: str, date: str):
-    return StreamingResponse(explanation(ticker, date), media_type="text/plain")
+    cached = get_cached_explanation(ticker, date)
+    if cached:
+        return cached
+
+    def generate_and_cache():
+        full_text = ""
+        for chunk in explanation(ticker, date):
+            full_text += chunk
+            yield chunk
+        if "No news articles found" not in full_text:
+            save_explanation_cache(ticker, date, full_text)
+
+    return StreamingResponse(generate_and_cache(), media_type="text/plain")
 
 
 def chain_generator(ticker, date):
